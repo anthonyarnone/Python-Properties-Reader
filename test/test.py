@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     reader2 = Properties()
     reader2.read('test/sample_1.properties')
-    print "Escaped backslash prop: [%s]" % (reader2['dos_path'])
+    print "Escaped backslash prop: [%s]" % (reader2['windows_path'])
     print "Escaped colon prop: [%s]" % (reader2['escaped_python'])
     print "Escaped equals prop: [%s]" % (reader2['escaped_math'])
     print "Escaped colon key prop: [%s]" % (reader2['C:\\Program Files\\R\\R-2.11.1-x64\\bin\\R.exe'])
