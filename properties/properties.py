@@ -7,6 +7,7 @@ class PropertiesException(Exception):
 class Properties():
 
     _input_separators = ['=', ':']
+    _comment_starter = ['#', '!']
     _unescape_vals = {'escaped' : ["\\=", "\\:", "\\ ", "\\\\"], 'bare' : ["=", ":", " ", "\\"]}
 
     class PropertyLine():
@@ -110,7 +111,7 @@ class Properties():
             current_line = lines[i].rstrip("\n")  # TODO  support multiline properties
 
             stripped_line = current_line.strip()
-            if len(stripped_line) == 0 or stripped_line.startswith('#'):
+            if len(stripped_line) == 0 or stripped_line[0] in self._comment_starter:
                 new_line = self.PropertyLine(self.PropertyLine.LineType.COMMENT, current_line)
                 self._lines.append(new_line)
             else:
