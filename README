@@ -1,0 +1,90 @@
+Python Properties Reader
+
+Python module to read and write Java-style properties files. Bug reports welcome.
+
+Author: Anthony Arnone  <aarnone@rightnow.com>
+
+
+
+--------------------
+KNOWN ISSUES
+--------------------
+
+  Does not support unicode
+
+  Does not support multiline properties
+
+  Does not support multivalued right hand sides
+
+  Does not validate very well. That is,
+      foo = bar = baz
+    will wind up as
+      {'foo' : 'bar = baz'}
+    in memory and as
+      foo = bar \= baz
+    if written out subsequently
+
+
+
+
+
+--------------------
+SAMPLE CODE
+--------------------
+
+
+import properties
+
+prop_file = 'some/path/to/file.properties'
+
+reader = properties.Properties()
+
+reader.setProperty('foo', 'bar')
+reader['something'] = 'else'
+
+f = open(prop_file, 'w')
+reader.write(f)
+f.close()
+
+reader.read(prop_file)
+
+assert(reader['foo'] == 'bar')
+assert(reader.getProperty('something') == 'else')
+
+reader.deleteProperty('foo')
+assert(reader['foo'] == None)
+
+
+
+
+--------------------
+PROPERTIES FILE FORMAT
+--------------------
+
+# comment
+! another comment
+key : value
+key = value
+key\:key = value\=value
+key value after first space if no colon or equals sign
+key until separator = value after
+
+
+   NOTE: When writing to a file, all properties will be written
+              <key> = <value>
+
+
+
+
+
+
+--------------------
+UNIT TESTING
+--------------------
+
+$ python test/test.py
+
+    NOTE: If a test fails, it may leave behind a temp file. It uses python's tempfile module, so wherever that leaves stuff.
+
+
+
