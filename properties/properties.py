@@ -6,19 +6,22 @@ class PropertiesException(Exception):
 
 class Properties():
 
+    _input_separators = ['=', ':']
+
     class PropertyLine():
+
         class LineType():
             UNKNOWN = 0
             COMMENT = 1
             PROPERTY = 2
 
         class Property():
-            separator = ' = '
+            _output_separator = ' = '
             def __init__(self, key, value):
                 self._key = key
                 self._value = value
 
-        def __init__(self, line_type, line_value, line_pos):
+        def __init__(self, line_type, line_value):
             if line_type is self.LineType.COMMENT and isinstance(line_value, str):
                 self._line_value = line_value
             elif line_type is self.LineType.PROPERTY and isinstance(line_value, tuple):
@@ -26,8 +29,7 @@ class Properties():
             else:
                 self._line_type = self.LineType.UNKNOWN 
                 raise PropertiesException("Invalid line type: %s" % (line_value))
-            self._line_type = line_type 
-            self._line_pos = line_pos
+            self._line_type = line_type
 
         def setValue(self, value):
             if self._line_type is self.LineType.COMMENT:
@@ -43,9 +45,9 @@ class Properties():
 
         def getLine(self):
             if self._line_type is self.LineType.COMMENT:
-                return line_value
+                return self._line_value
             elif self._line_type is self.LineType.PROPERTY:
-                return "%s%s%s" % (self._line_value._key, self.Property.separator, self._line_value._value)
+                return "%s%s%s" % (self._line_value._key, self.Property._output_separator, self._line_value._value)
 
     def __init__(self):
         self._reset()
@@ -58,7 +60,7 @@ class Properties():
         if self._properties.has_key(key):
             self._properties[key].setValue(value)
         else:
-            new_line = self.PropertyLine(self.PropertyLine.LineType.PROPERTY, (key, value), len(self._lines))
+            new_line = self.PropertyLine(self.PropertyLine.LineType.PROPERTY, (key, value))
             self._lines.append(new_line)
             self._properties[key] = new_line
 
@@ -88,7 +90,41 @@ class Properties():
 
     def read(self, file_name):
         self._reset()
-        if not os.path.exists(file_name):
-            return
+
+        f = open(file_name, 'r')
+        lines = f.readlines()
+        f.close
+
+        for i in range(len(lines)):
+            current_line = lines[i].rstrip("\n")  # TODO  support multiline properties
+
+            if not current_line.strip() or current_line.strip().startswith('#'):
+                new_line = self.PropertyLine(self.PropertyLine.LineType.COMMENT, current_line)
+                self._lines.append(new_line)
+            else:
+                current_line = current_line.strip()
+
+                sep_found = False
+                for i in range(len(current_line)):
+                    if current_line[i] in self._input_separators and (i == 0 or current_line[i-1] != '\\'):
+                        sep_found = True
+                        key = current_line[0:i].strip()
+                        value = current_line[i+1:len(current_line)].strip()
+                        break
+                if not sep_found:
+                    space_pos = len(current_line)
+                    for i in range(len(current_line)):
+                        if current_line[i] is ' ' and current_line[i-1] != '\\':
+                            space_pos = i
+                            break
+                    key = current_line[0:space_pos].strip()
+                    value = current_line[space_pos+1:len(current_line)].strip()
+
+                if len(key) == 0:
+                    raise PropertiesException("Zero-length property on line: [%s]. (raw = [%s])" % (current_line, lines[i]))
+
+                new_line = self.PropertyLine(self.PropertyLine.LineType.PROPERTY, (key, value))
+                self._lines.append(new_line)
+                self._properties[key] = new_line
 
 

@@ -9,7 +9,6 @@ if __name__ == '__main__':
 
     print "Creating Properties Reader"
     reader = Properties()
-    reader.read('test.properties')
 
     reader['foo'] = 'bar'
     print "----"
@@ -27,7 +26,15 @@ if __name__ == '__main__':
     reader.write(sys.stdout)
 
     print "----"
-    print "prop 'google' : %s" % (reader['google'])
+    print "property 'google' : %s" % (reader['google'])
+    print "non-existant prop 'hannibal' : %s" % (reader['hannibal'])
 
+
+
+
+    reader2 = Properties()
+    reader2.read('test/sample_1.properties')
+    print "----"
+    reader2.write(sys.stdout)
     print "Done"
 
