@@ -7,8 +7,13 @@ class PropertiesException(Exception):
 class Properties():
 
     _input_separators = ['=', ':']
+    _unescape_vals = {'escaped' : ["\\=", "\\:", "\\ ", "\\\\"], 'bare' : ["=", ":", " ", "\\"]}
 
     class PropertyLine():
+
+        _output_separator = ' = '
+        # since we only output with a real separator ('='), we don't have to unescape spaces
+        _escape_vals = {'escaped' : ["\\\\", "\\=", "\\:"], 'bare' : ["\\", "=", ":"]}
 
         class LineType():
             UNKNOWN = 0
@@ -16,7 +21,6 @@ class Properties():
             PROPERTY = 2
 
         class Property():
-            _output_separator = ' = '
             def __init__(self, key, value):
                 self._key = key
                 self._value = value
@@ -43,11 +47,18 @@ class Properties():
             elif self._line_type is self.LineType.PROPERTY:
                 return self._line_value._value
 
-        def getLine(self):
+        def getPrintableLine(self):
             if self._line_type is self.LineType.COMMENT:
                 return self._line_value
             elif self._line_type is self.LineType.PROPERTY:
-                return "%s%s%s" % (self._line_value._key, self.Property._output_separator, self._line_value._value)
+                return "%s%s%s" % (self._escapeString(self._line_value._key), self._output_separator,
+                        self._escapeString(self._line_value._value))
+
+        def _escapeString(self, string):
+            for i in range(len(self._escape_vals['bare'])):
+                string = string.replace(self._escape_vals['bare'][i], self._escape_vals['escaped'][i])
+            return string
+
 
     def __init__(self):
         self._reset()
@@ -86,7 +97,7 @@ class Properties():
         if out.mode[0] != 'w':
             raise PropertiesException("Out stream [%s] is not writable" % (out))
         for line in self._lines:
-            out.write("%s\n" % (line.getLine()))
+            out.write("%s\n" % (line.getPrintableLine()))
 
     def read(self, file_name):
         self._reset()
@@ -98,33 +109,46 @@ class Properties():
         for i in range(len(lines)):
             current_line = lines[i].rstrip("\n")  # TODO  support multiline properties
 
-            if not current_line.strip() or current_line.strip().startswith('#'):
+            stripped_line = current_line.strip()
+            if len(stripped_line) == 0 or stripped_line.startswith('#'):
                 new_line = self.PropertyLine(self.PropertyLine.LineType.COMMENT, current_line)
                 self._lines.append(new_line)
             else:
-                current_line = current_line.strip()
-
-                sep_found = False
-                for i in range(len(current_line)):
-                    if current_line[i] in self._input_separators and (i == 0 or current_line[i-1] != '\\'):
-                        sep_found = True
-                        key = current_line[0:i].strip()
-                        value = current_line[i+1:len(current_line)].strip()
-                        break
-                if not sep_found:
-                    space_pos = len(current_line)
-                    for i in range(len(current_line)):
-                        if current_line[i] is ' ' and current_line[i-1] != '\\':
-                            space_pos = i
-                            break
-                    key = current_line[0:space_pos].strip()
-                    value = current_line[space_pos+1:len(current_line)].strip()
+                (key, value) = self._keyValFromLine(stripped_line)
 
                 if len(key) == 0:
-                    raise PropertiesException("Zero-length property on line: [%s]. (raw = [%s])" % (current_line, lines[i]))
+                    raise PropertiesException("Zero-length property on line: [%s]. (raw = [%s])" % (stripped_line, current_line))
 
                 new_line = self.PropertyLine(self.PropertyLine.LineType.PROPERTY, (key, value))
                 self._lines.append(new_line)
                 self._properties[key] = new_line
+
+    def _keyValFromLine(self, line):
+        sep_found = False
+        for i in range(len(line)):
+            if line[i] in self._input_separators and (i == 0 or line[i-1] != '\\'):
+                sep_found = True
+                key = line[0:i].strip()
+                value = line[i+1:len(line)].strip()
+                break
+        if not sep_found:
+            space_pos = len(line)
+            for i in range(len(line)):
+                if line[i] is ' ' and (i == 0 or line[i-1] != '\\'):
+                    space_pos = i
+                    break
+            key = line[0:space_pos].strip()
+            value = line[space_pos+1:len(line)].strip()
+
+        key = self._unescapeString(key)
+        value = self._unescapeString(value)
+
+        return (key, value)
+
+    def _unescapeString(self, string):
+        for i in range(len(self._unescape_vals['bare'])):
+            string = string.replace(self._unescape_vals['escaped'][i], self._unescape_vals['bare'][i])
+        return string
+
 
 
