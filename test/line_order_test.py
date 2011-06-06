@@ -31,9 +31,7 @@ class LineOrderTest(unittest.TestCase):
         reader['more'] = 'chocolate!'
         reader['foo'] = 'food'
 
-        f2 = open(f.name, 'w')
-        reader.write(f2)
-        f2.close()
+        reader.write(f.name)
 
         f2 = open(f.name, 'r')
         lines = f2.readlines()
@@ -69,9 +67,7 @@ class LineOrderTest(unittest.TestCase):
         reader['foo'] = 'food'
         reader.deleteProperty('space')
 
-        f2 = open(f.name, 'w')
-        reader.write(f2)
-        f2.close()
+        reader.write(f.name)
 
         f2 = open(f.name, 'r')
         lines = f2.readlines()

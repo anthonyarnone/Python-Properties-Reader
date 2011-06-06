@@ -101,9 +101,7 @@ class DeleteTest(unittest.TestCase):
         reader.deleteProperty('foo')
         reader.deleteProperty('this-line-has-no-value')
 
-        f2 = open(f.name, 'w')
-        reader.write(f2)
-        f2.close()
+        reader.write(f.name)
 
         reader.read(f.name)
 

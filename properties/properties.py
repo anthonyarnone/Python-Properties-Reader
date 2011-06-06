@@ -103,11 +103,15 @@ class Properties():
                 del self._lines[i]
                 del self._properties[current_key]
 
-    def write(self, out):
+    def writeToStream(self, out):
         if out.mode[0] != 'w':
             raise PropertiesException("Out stream [%s] is not writable" % (out))
         for line in self._lines:
             out.write("%s\n" % (line.getPrintableLine()))
+
+    def write(self, file_name):
+        f = open(file_name, 'w')
+        self.writeToStream(f)
 
     def read(self, file_name):
         self._reset()

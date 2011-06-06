@@ -68,8 +68,8 @@ class WriteTest(unittest.TestCase):
         self.assertEqual(reader['water'], 'chestnut')
 
         f = NamedTemporaryFile(delete=False)
-        reader.write(f)
         f.close()
+        reader.write(f.name)
 
         reader2 = properties.Properties()
         reader2.read(f.name)
@@ -94,8 +94,8 @@ class WriteTest(unittest.TestCase):
         self.assertEqual(reader['water'], 'chestnut')
 
         f = NamedTemporaryFile(delete=False)
-        reader.write(f)
         f.close()
+        reader.write(f.name)
 
         reader2 = properties.Properties()
         reader2.read(f.name)
@@ -107,4 +107,29 @@ class WriteTest(unittest.TestCase):
         os.unlink(f.name)
         self.assertFalse(os.path.exists(f.name))
 
+
+    def test_writeToStream(self):
+        reader = properties.Properties()
+
+        reader['foo'] = 'bar'
+        reader['something'] = 'else'
+        reader['water'] = 'chestnut'
+
+        self.assertEqual(reader['foo'], 'bar')
+        self.assertEqual(reader['something'], 'else')
+        self.assertEqual(reader['water'], 'chestnut')
+
+        f = NamedTemporaryFile(delete=False)
+        reader.writeToStream(f)
+        f.close()
+
+        reader2 = properties.Properties()
+        reader2.read(f.name)
+
+        self.assertEqual(reader2['foo'], 'bar')
+        self.assertEqual(reader2['something'], 'else')
+        self.assertEqual(reader2['water'], 'chestnut')
+
+        os.unlink(f.name)
+        self.assertFalse(os.path.exists(f.name))
 

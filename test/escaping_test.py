@@ -97,8 +97,8 @@ class EscapingTest(unittest.TestCase):
 
         del f
         f = NamedTemporaryFile(delete=False)
-        reader.write(f)
         f.close()
+        reader.write(f.name)
 
         f2 = open(f.name, 'r')
         lines = f2.readlines()
@@ -173,8 +173,8 @@ class EscapingTest(unittest.TestCase):
 
         del f
         f = NamedTemporaryFile(delete=False)
-        reader.write(f)
         f.close()
+        reader.write(f.name)
 
         reader2 = properties.Properties()
         reader2.read(f.name)
