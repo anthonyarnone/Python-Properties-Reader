@@ -32,6 +32,56 @@ class DeleteTest(unittest.TestCase):
         self.assertEqual(reader['water'], None)
 
 
+    def test_DeleteByPrefix(self):
+        reader = properties.Properties()
+
+        reader['foo'] = 'bar'
+        reader['foo1'] = 'bar'
+        reader['foo2'] = 'bar'
+        reader['foo3'] = 'bar'
+        reader['foo4'] = 'bar'
+        reader['foo5'] = 'bar'
+        reader['fo'] = 'bar'
+
+        self.assertEqual(reader['foo'], 'bar')
+        self.assertEqual(reader['foo1'], 'bar')
+        self.assertEqual(reader['foo2'], 'bar')
+        self.assertEqual(reader['foo3'], 'bar')
+        self.assertEqual(reader['foo4'], 'bar')
+        self.assertEqual(reader['foo5'], 'bar')
+        self.assertEqual(reader['fo'], 'bar')
+
+        reader.deletePropertiesByKeyPrefix('foo')
+
+        self.assertEqual(reader['foo'], None)
+        self.assertEqual(reader['foo1'], None)
+        self.assertEqual(reader['foo2'], None)
+        self.assertEqual(reader['foo3'], None)
+        self.assertEqual(reader['foo4'], None)
+        self.assertEqual(reader['foo5'], None)
+        self.assertEqual(reader['fo'], 'bar')
+
+
+    def test_DeleteEverything(self):
+        reader = properties.Properties()
+
+        reader['garble'] = 'warble'
+        reader['fo'] = 'bar'
+        reader['foo'] = 'bar'
+        reader['foofoo foo'] = 'bar'
+
+        self.assertEqual(reader['garble'], 'warble')
+        self.assertEqual(reader['foo'], 'bar')
+        self.assertEqual(reader['foofoo foo'], 'bar')
+
+        reader.deleteProperty('garble')
+        reader.deletePropertiesByKeyPrefix('fo')
+
+        self.assertEqual(reader['garble'], None)
+        self.assertEqual(reader['foo'], None)
+        self.assertEqual(reader['foofoo foo'], None)
+
+
     def test_DeleteWithFile(self):
         f = NamedTemporaryFile(delete=False)
         f.write("foo = bar" + "\n")
