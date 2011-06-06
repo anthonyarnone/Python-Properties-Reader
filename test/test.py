@@ -5,6 +5,7 @@ import write_test
 import delete_test
 import escaping_test
 import line_order_test
+import exception_test
 
 if __name__ == '__main__':
     
@@ -25,6 +26,10 @@ if __name__ == '__main__':
 
     line_order_suite = unittest.TestLoader().loadTestsFromTestCase(line_order_test.LineOrderTest)
     properties_suite.addTest(line_order_suite)
+
+    exception_suite = unittest.TestLoader().loadTestsFromTestCase(exception_test.ExceptionTest)
+    properties_suite.addTest(exception_suite)
+
 
     unittest.TextTestRunner(verbosity=2).run(properties_suite)
 

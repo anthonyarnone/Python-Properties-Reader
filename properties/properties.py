@@ -69,6 +69,9 @@ class Properties():
         self._properties = {} # a dict of pointers to PropertyLine objects for fast lookup
 
     def setProperty(self, key, value):
+        if type(key) is not str or type(value) is not str:
+            raise PropertiesException("Property key and value must be a string [key : value] = [%s : %s]" % (type(key), type(value)))
+
         if self._properties.has_key(key):
             self._properties[key].setValue(value)
         else:
