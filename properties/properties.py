@@ -101,10 +101,11 @@ class Properties():
         # since we're going to be deleting lines, we need to go backwards
         # through the array so we don't go out of bounds
         for i in range(len(self._lines)-1, -1, -1):
-            current_key = self._lines[i]._line_value._key
-            if self._lines[i]._line_type is self.PropertyLine.LineType.PROPERTY and current_key.startswith(prefix):
-                del self._lines[i]
-                del self._properties[current_key]
+            if self._lines[i]._line_type is self.PropertyLine.LineType.PROPERTY:
+                current_key = self._lines[i]._line_value._key
+                if current_key.startswith(prefix):
+                    del self._lines[i]
+                    del self._properties[current_key]
 
     def writeToStream(self, out):
         if out.mode[0] != 'w':
