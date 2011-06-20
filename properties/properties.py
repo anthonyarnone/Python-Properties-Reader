@@ -89,6 +89,9 @@ class Properties():
     def __setitem__(self, key, value):
         self.setProperty(key, value)
 
+    def keys(self):
+        return self._properties.keys()
+
     def deleteProperty(self, key):
         if self._properties.has_key(key):
             for i in range(len(self._lines)):
