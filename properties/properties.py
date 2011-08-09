@@ -108,7 +108,10 @@ class Properties():
                 current_key = self._lines[i]._line_value._key
                 if current_key.startswith(prefix):
                     del self._lines[i]
-                    del self._properties[current_key]
+                    # also, since the file might be malformed and contain two identical keys (values may or may 
+                    #  not be the same), this properties key may already be gone. Make sure it's still there
+                    if self._properties.has_key(current_key):
+                        del self._properties[current_key]
 
     def writeToStream(self, out):
         if out.mode[0] != 'w':

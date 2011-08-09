@@ -110,6 +110,13 @@ class DeleteTest(unittest.TestCase):
         reader['foo2'] = 'bar'
         reader['fo'] = 'bar'
 
+        reader['fo__blahdfa_helllo/amber'] = 'bar'
+        reader['fo__blahdfa_helllo/blue'] = 'bar'
+        reader['fo__blahdfa_helllo/red'] = 'bar'
+        reader['fo__blahdfa_helllo__pro/amber'] = 'bar'
+        reader['fo__blahdfa_helllo__pro/blue'] = 'bar'
+        reader['fo__blahdfa_helllo__pro/red'] = 'bar'
+
         self.assertEqual(reader['group'], 'rate')
         self.assertEqual(reader['foo'], 'bar')
         self.assertEqual(reader['foo1'], 'bar')
@@ -124,8 +131,88 @@ class DeleteTest(unittest.TestCase):
         self.assertEqual(reader['foo2'], None)
         self.assertEqual(reader['fo'], 'bar')
 
+        reader.deletePropertiesByKeyPrefix('fo__blahdfa_helllo/')
+        self.assertEqual(reader['fo__blahdfa_helllo/amber'], None)
+
+        reader.deletePropertiesByKeyPrefix('fo__blahdfa_helllo__pro/')
+        self.assertEqual(reader['fo__blahdfa_helllo__pro/amber'], None)
+
         os.unlink(f.name)
         self.assertFalse(os.path.exists(f.name))
+
+
+    def test_DeleteDupKey(self):
+        f = NamedTemporaryFile(delete=False)
+        f.write("hello = bozo\n")
+        f.write("hello = again\n")
+        f.close()
+
+        reader = properties.Properties()
+        reader.read(f.name)
+
+        self.assertEqual(reader['hello'], 'again')
+
+        reader.deleteProperty('hello')
+        self.assertEqual(reader['hello'], None)
+
+        reader.write(f.name)
+        reader.read(f.name)
+
+        self.assertEqual(reader['hello'], 'bozo')
+
+        reader.deleteProperty('hello')
+        self.assertEqual(reader['hello'], None)
+
+        reader.write(f.name)
+        reader.read(f.name)
+
+        self.assertEqual(reader['hello'], None)
+
+        os.unlink(f.name)
+        self.assertFalse(os.path.exists(f.name))
+
+
+    def test_DeleteDupKeyByPrefix(self):
+        f = NamedTemporaryFile(delete=False)
+        f.write("hello = bozo\n")
+        f.write("hello = again\n")
+        f.close()
+
+        reader = properties.Properties()
+        reader.read(f.name)
+
+        self.assertEqual(reader['hello'], 'again')
+
+        try:
+            reader.deletePropertiesByKeyPrefix('hello')
+        except Exception as e:
+            self.fail("deletePropertiesByKeyPrefix exception: [%s]" % (e))
+
+        self.assertEqual(reader['hello'], None)
+
+        reader.write(f.name)
+        reader.read(f.name)
+
+        self.assertEqual(reader['hello'], None)
+
+        os.unlink(f.name)
+        self.assertFalse(os.path.exists(f.name))
+
+
+    def test_DeleteNonexistantByPrefix(self):
+        reader = properties.Properties()
+
+        reader['foo'] = 'bar'
+        reader['foo1'] = 'bar'
+        reader['foo2'] = 'bar'
+        reader['fo'] = 'bar'
+
+        reader['fo__blahdfa_helllo/amber'] = 'bar'
+        reader['fo__blahdfa_helllo/blue'] = 'bar'
+        reader['fo__blahdfa_helllo/red'] = 'bar'
+
+        reader.deletePropertiesByKeyPrefix('fo__blahd/')
+        reader.deletePropertiesByKeyPrefix('asdf')
 
 
     def test_DeleteEverything(self):

@@ -133,3 +133,30 @@ class WriteTest(unittest.TestCase):
         os.unlink(f.name)
         self.assertFalse(os.path.exists(f.name))
 
+
+    def test_dupKeyPreservedThroughWrite(self):
+        f = NamedTemporaryFile(delete=False)
+        f.write("hello = bozo\n")
+        f.write("hello = again\n")
+        f.close()
+
+        reader = properties.Properties()
+        reader.read(f.name)
+
+        self.assertEqual(reader['hello'], 'again')
+
+        reader.write(f.name)
+        reader.read(f.name)
+
+        self.assertEqual(reader['hello'], 'again')
+
+        f2 = open(f.name, 'r')
+        lines = f2.readlines()
+        f2.close()
+
+        self.assertTrue("hello = bozo\n" in lines)
+        self.assertTrue("hello = again\n" in lines)
+
+        os.unlink(f.name)
+        self.assertFalse(os.path.exists(f.name))
+

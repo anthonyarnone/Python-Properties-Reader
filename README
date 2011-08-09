@@ -7,7 +7,7 @@ Author: Anthony Arnone  <aarnone@rightnow.com>
 
 
 --------------------
-KNOWN ISSUES
+KNOWN ISSUES / CAVEATS
 --------------------
 
   Does not support unicode
@@ -24,7 +24,8 @@ KNOWN ISSUES
       foo = bar \= baz
     if written out subsequently
 
-
+  When reading a properties file with duplicate keys, the last value is used. If that key is deleted or updated,
+    only that line in the file will be affected. However, delete by prefix will remove _all_ of the duplicates.
 
 
 
