@@ -32,19 +32,19 @@ class Properties():
             elif line_type is self.LineType.PROPERTY and isinstance(line_value, tuple):
                 self._line_value = self.Property(line_value[0], line_value[1])
             else:
-                self._line_type = self.LineType.UNKNOWN 
+                self._line_type = self.LineType.UNKNOWN
                 raise PropertiesException("Invalid line type: %s" % (line_value))
             self._line_type = line_type
 
         def setValue(self, value):
             if self._line_type is self.LineType.COMMENT:
-                line_value = value
+                self._line_value._value = value
             elif self._line_type is self.LineType.PROPERTY:
                 self._line_value._value = value
 
         def getValue(self):
             if self._line_type is self.LineType.COMMENT:
-                return line_value
+                return self._line_value._value
             elif self._line_type is self.LineType.PROPERTY:
                 return self._line_value._value
 
@@ -108,7 +108,7 @@ class Properties():
                 current_key = self._lines[i]._line_value._key
                 if current_key.startswith(prefix):
                     del self._lines[i]
-                    # also, since the file might be malformed and contain two identical keys (values may or may 
+                    # also, since the file might be malformed and contain two identical keys (values may or may
                     #  not be the same), this properties key may already be gone. Make sure it's still there
                     if self._properties.has_key(current_key):
                         del self._properties[current_key]
@@ -128,7 +128,7 @@ class Properties():
 
         f = open(file_name, 'r')
         lines = f.readlines()
-        f.close
+        f.close()
 
         for i in range(len(lines)):
             current_line = lines[i].rstrip("\n")  # TODO  support multiline properties
@@ -158,7 +158,7 @@ class Properties():
         if not sep_found:
             space_pos = len(line)
             for i in range(len(line)):
-                if line[i] is ' ' and (i == 0 or line[i-1] != '\\'):
+                if line[i] == ' ' and (i == 0 or line[i-1] != '\\'):
                     space_pos = i
                     break
             key = line[0:space_pos].strip()
